@@ -1,110 +1,127 @@
-# StreamElements (SE.Live) Linux Plugin for OBS Studio
+# obs-streamelements-linux
 
-[![C++20](https://img.shields.io/badge/C%2B%2B-20-blue.svg)](https://en.wikipedia.org/wiki/C%2B%2B20)
-[![Qt](https://img.shields.io/badge/Qt-6.x-green.svg)](https://www.qt.io/)
-[![OBS Studio](https://img.shields.io/badge/OBS%20Studio-30%2B%20%2F%2031%2B%20%2F%2032%2B-red.svg)](https://obsproject.com/)
-[![License: GPL-2.0](https://img.shields.io/badge/License-GPL%202.0-blue.svg)](LICENSE)
+[![C++20](https://img.shields.io/badge/C%2B%2B-20-00599C?style=flat-square&logo=c%2B%2B&logoColor=white)](https://isocpp.org/)
+[![Qt6](https://img.shields.io/badge/Qt-6.x-41CD52?style=flat-square&logo=qt&logoColor=white)](https://qt.io)
+[![OBS Studio](https://img.shields.io/badge/OBS%20Studio-30%2B-302E31?style=flat-square&logo=obsstudio&logoColor=white)](https://obsproject.com)
+[![License: GPL-2.0](https://img.shields.io/badge/License-GPL--2.0-blue.svg?style=flat-square)](LICENSE)
 
-A clean, native Linux port of the **StreamElements (SE.Live)** OBS Studio plugin. Built with modern **C++20**, **Qt 6**, and `libobs` to deliver full feature parity with the Windows version without Wine or emulation.
+Native Linux implementation of the StreamElements (SE.Live / OBS.Live) plugin for OBS Studio.
 
----
-
-## ✨ Features
-
-- **🔴 Top-Level StreamElements Menu**:
-  - Inserted directly into OBS Studio's main menu bar with official StreamElements branding.
-  - Direct links to *Setup Bot & Tipping*, *Browse Overlays*, *Support*, and *Account Management*.
-- **📊 Native Browser Docks**:
-  - **Activity Feed**: Real-time event notifications, tips, followers, subscribers, and cheer alerts.
-  - **Live Chat**: Embedded chat dock for Twitch, YouTube, and Kick.
-  - **Media Request**: Live song request queue and volume control.
-- **⚡ Local API WebSocket Server (`ws://127.0.0.1:8092`)**:
-  - Full JSON-RPC implementation compatible with SE.Live web widgets.
-  - Emits real-time OBS state changes (`streamingStarted`, `streamingStopped`, `sceneChanged`, `recordingStarted`).
-- **🎵 Audio Wrapper Source Filter**:
-  - Registers `streamelements_transition_audio_wrapper_source` to handle seamless transition audio for StreamElements scene stinger transitions.
-- **💾 Cloud Backup Manager**:
-  - Full packaging and restoration of OBS scenes, collections, and profiles.
-- **🔐 Multi-Method Authentication**:
-  - **Browser Loopback Login (RFC 8252)**: Opens your default browser (Brave, Chrome, Firefox) to authenticate via Google/YouTube without triggering Google's *"This browser or app may not be secure"* embedded webview block.
-  - **Quick Connect (JWT Token)**: Paste your StreamElements JWT Token for instant authentication in 5 seconds.
-  - Persistent session storage in `~/.config/obs-studio/plugins/obs-streamelements/`.
-- **🌍 50+ Languages Included**:
-  - Complete official locale translations loaded from `data/locale/`.
+Re-implemented in modern C++ using Qt 6 and `libobs` to provide native dock integration, overlay communication, and authentication without Wine or Windows runtime layers.
 
 ---
 
-## 🛠️ Prerequisites & Dependencies
+## Architecture & Features
 
-### Arch Linux / Manjaro
-```bash
-sudo pacman -S base-devel cmake qt6-base qt6-webengine qt6-websockets curl obs-studio
+| Component | Description | Implementation |
+|---|---|---|
+| **StreamElements Menu** | Top-level menu bar integration matching official SE.Live branding | Native Qt menu injected before Help |
+| **Activity Feed Dock** | Live event stream for followers, tips, subs, and cheers | Chromium-based `QWebEngineView` dock |
+| **Chat Dock** | Live stream chat for Twitch, YouTube, and Kick | Persistent profile web dock |
+| **Media Request Dock** | Song request playback control and queue management | Embedded StreamElements dock |
+| **API WebSocket Server** | Local JSON-RPC bridge on `ws://127.0.0.1:8092` for overlay events | `Qt6WebSockets` event loop |
+| **Transition Audio Wrapper** | Registers `streamelements_transition_audio_wrapper_source` | libobs source filter |
+| **Cloud Backup** | Packages and restores OBS scenes, collections, and profile data | Native JSON serialization |
+| **Authentication System** | Loopback OAuth (RFC 8252) + JWT token fallback | `QTcpServer` + `QWebEngineCookieStore` |
+| **Localization** | Multi-language translation support | 50+ official language files included |
+
+---
+
+## Authentication Flow
+
+Google and YouTube disallow OAuth authentication inside embedded web views (`QWebEngineView` / CEF). This plugin resolves the block by providing two connection flows:
+
+1. **System Browser Loopback (RFC 8252)**:
+   - Spawns a temporary loopback HTTP server on `127.0.0.1:4269` with Private Network Access and CORS headers.
+   - Launches your default system browser (Brave, Chrome, Firefox) where you are already signed in.
+   - Catches the redirect token on loopback, sets persistent cookies on `.streamelements.com`, and notifies OBS.
+
+2. **Quick Connect (JWT Token)**:
+   - Paste your JWT token directly from your StreamElements account settings.
+   - Validates via `https://api.streamelements.com/kappa/v2/channels/me` and injects session cookies directly into the QtWebEngine profile.
+
+---
+
+## Dependencies
+
+### System Requirements
+- Linux (x86_64)
+- OBS Studio 30.0 or newer (with development headers)
+- Qt 6 (Core, Widgets, WebEngineWidgets, WebSockets, Network)
+- libcurl
+- C++20 compiler (`gcc` 11+ or `clang` 14+)
+
+### Package Installation
+
+#### Arch Linux / Manjaro
+```sh
+sudo pacman -S base-devel cmake obs-studio qt6-base qt6-webengine qt6-websockets curl
 ```
 
-### Ubuntu / Debian (22.04+ / 24.04+)
-```bash
+#### Ubuntu / Debian (22.04+ / 24.04+)
+```sh
 sudo apt update
-sudo apt install build-essential cmake qt6-base-dev qt6-webengine-dev \
-    libqt6websockets6-dev libcurl4-openssl-dev libobs-dev
+sudo apt install build-essential cmake libobs-dev qt6-base-dev qt6-webengine-dev \
+    libqt6websockets6-dev libcurl4-openssl-dev
 ```
 
-### Fedora
-```bash
-sudo dnf install gcc-c++ cmake qt6-qtbase-devel qt6-qtwebengine-devel \
-    qt6-qtwebsockets-devel libcurl-devel obs-studio-devel
+#### Fedora
+```sh
+sudo dnf install gcc-c++ cmake obs-studio-devel qt6-qtbase-devel qt6-qtwebengine-devel \
+    qt6-qtwebsockets-devel libcurl-devel
 ```
 
 ---
 
-## 🚀 Building & Installing
+## Build & Installation
 
-### Quick Install (Makefile)
+### Option 1: Makefile (Recommended)
 
-Clone and compile directly:
-```bash
+```sh
 git clone https://github.com/Towartz/obs-streamelements-linux.git
 cd obs-streamelements-linux
 make -j$(nproc)
 make install
 ```
 
-### Or using CMake
+### Option 2: CMake
 
-```bash
+```sh
 git clone https://github.com/Towartz/obs-streamelements-linux.git
 cd obs-streamelements-linux
-mkdir build && cd build
-cmake ..
-cmake --build . -j$(nproc)
-cmake --install .
+cmake -B build -DCMAKE_BUILD_TYPE=Release
+cmake --build build -j$(nproc)
+cmake --install build
 ```
 
-The plugin binary and assets will be installed to:
+### Installed Locations
 - Binary: `~/.config/obs-studio/plugins/obs-streamelements/bin/64bit/obs-streamelements.so`
-- Assets: `~/.config/obs-studio/plugins/obs-streamelements/data/`
+- Assets & Locales: `~/.config/obs-studio/plugins/obs-streamelements/data/`
 
 ---
 
-## 🔑 Logging In
+## Configuration & Usage
 
-1. Open **OBS Studio**.
-2. Click **StreamElements** → **Login** in the top menu bar.
-3. Choose your preferred connection method:
-   - **Browser Login**: Click your platform (e.g., **YouTube**). It opens your default browser where you are already signed in. Approve the connection, and OBS will connect automatically.
-   - **Quick Connect (JWT Token)**: Click *Open StreamElements Account Settings*, copy your **JWT Token** under *Show Secrets*, paste it into OBS, and click *Connect Account*.
+1. Launch OBS Studio.
+2. Navigate to **StreamElements** > **Login** in the top menu.
+3. Choose your connection method:
+   - Click your platform under **Browser Login** and approve the session in your browser.
+   - Or paste your JWT Token from [streamelements.com/dashboard/account/channels](https://streamelements.com/dashboard/account/channels) under **Quick Connect**.
+4. Docks will automatically load and mount your authenticated feed, chat, and media request widgets.
 
 ---
 
-## 🗑️ Uninstallation
+## Uninstallation
 
-To completely remove the plugin and restore OBS Studio to vanilla state:
-```bash
+To remove the plugin and restore OBS Studio to its default state:
+
+```sh
 rm -rf ~/.config/obs-studio/plugins/obs-streamelements
 ```
 
 ---
 
-## ⚖️ License & Disclaimer
+## License
 
-- Distributed under the **GNU General Public License v2.0** ([GPL-2.0](LICENSE)).
-- This is an independent, community-driven open-source project and is not officially affiliated with or endorsed by StreamElements.
+This project is licensed under the [GNU General Public License v2.0](LICENSE).
+StreamElements and SE.Live are trademarks of StreamElements Ltd. This project is an independent community implementation.
