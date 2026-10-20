@@ -1,0 +1,23 @@
+# Build artifacts
+build/
+*.o
+*.so
+*.a
+moc_*.cpp
+
+# Binaries and extracted payload
+*.exe
+*.dll
+*.pdb
+extracted/
+
+# Temporary and editor files
+.vscode/
+.idea/
+*.swp
+*~
+.DS_Store
+
+# User configuration
+auth.json
+storage/
