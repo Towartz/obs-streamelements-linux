@@ -45,7 +45,6 @@ static void on_frontend_event(enum obs_frontend_event event, void *private_data)
         
         QMainWindow *mainWindow = static_cast<QMainWindow *>(obs_frontend_get_main_window());
         if (mainWindow) {
-            // Schedule UI initialization on the Qt main GUI thread
             QMetaObject::invokeMethod(mainWindow, [mainWindow]() {
                 StreamElementsAuthManager::instance().init();
 

@@ -35,15 +35,12 @@ private:
 
     QTabWidget *m_tabs = nullptr;
 
-    // Browser Auth UI
     StreamElementsAuthServer *m_authServer = nullptr;
     QLabel *m_browserStatusLabel = nullptr;
 
-    // Token Auth UI
     QLineEdit *m_tokenInput = nullptr;
     QPushButton *m_connectTokenBtn = nullptr;
     QLabel *m_tokenStatusLabel = nullptr;
 
-    // Embedded Web UI
     QWebEngineView *m_webView = nullptr;
 };

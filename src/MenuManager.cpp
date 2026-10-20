@@ -53,7 +53,7 @@ void StreamElementsMenuManager::setupUi()
 
     QMenuBar *menuBar = m_mainWindow->menuBar();
     
-    // Find Help menu to insert StreamElements before it, just like SE.Live on Windows
+    // Insert StreamElements before Help menu
     QAction *helpAction = nullptr;
     const auto actions = menuBar->actions();
     for (QAction *action : actions) {
@@ -65,7 +65,6 @@ void StreamElementsMenuManager::setupUi()
 
     m_seMenu = new QMenu(tr("StreamElements"), menuBar);
 
-    // 1. Login / Logout Action
     m_loginAction = new QAction(tr("Login"), m_seMenu);
     m_loginAction->setObjectName("seLoginAction");
     connect(m_loginAction, &QAction::triggered, this, &StreamElementsMenuManager::onLoginAction);
@@ -73,13 +72,11 @@ void StreamElementsMenuManager::setupUi()
 
     m_seMenu->addSeparator();
 
-    // 2. Stream Setup Submenu
     m_setupMenu = new QMenu(tr("Stream Setup"), m_seMenu);
     m_botTippingAction = m_setupMenu->addAction(tr("Setup Bot && Tipping"), this, &StreamElementsMenuManager::onSetupBotTipping);
     m_browseOverlaysAction = m_setupMenu->addAction(tr("Browse Overlays..."), this, &StreamElementsMenuManager::onBrowseOverlays);
     m_seMenu->addMenu(m_setupMenu);
 
-    // 3. SE.Live Docks Submenu
     m_docksMenu = new QMenu(tr("SE.Live Docks"), m_seMenu);
     m_activityFeedAction = m_docksMenu->addAction(tr("Activity Feed"), this, &StreamElementsMenuManager::onToggleActivityFeed);
     m_chatAction = m_docksMenu->addAction(tr("Chat"), this, &StreamElementsMenuManager::onToggleChat);
@@ -88,7 +85,6 @@ void StreamElementsMenuManager::setupUi()
 
     m_seMenu->addSeparator();
 
-    // 4. Help Submenu
     m_helpMenu = new QMenu(tr("Help"), m_seMenu);
     m_liveSupportAction = m_helpMenu->addAction(tr("StreamElements Live Support"), this, &StreamElementsMenuManager::onLiveSupport);
     m_checkForUpdatesAction = m_helpMenu->addAction(tr("Check for Updates"), this, &StreamElementsMenuManager::onCheckForUpdates);
@@ -124,7 +120,6 @@ void StreamElementsMenuManager::setupUi()
 void StreamElementsMenuManager::applyTheme()
 {
     if (m_seMenu) {
-        // Apply the official StreamElements highlight styling recovered from disassembly
         m_seMenu->setStyleSheet(
             "QMenu::item#seLoginAction { color: #F53656; font-weight: bold; }"
             "QMenu::item:selected { background-color: #2b2e38; }"

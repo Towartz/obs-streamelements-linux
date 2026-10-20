@@ -14,7 +14,6 @@ void StreamElementsBrowserWidgetManager::registerDefaultDocks()
 {
     if (!m_mainWindow) return;
 
-    // 1. Activity Feed Dock
     auto *activityFeed = new StreamElementsBrowserDock(
         "se_activity_feed",
         tr("StreamElements Activity Feed"),
@@ -24,7 +23,6 @@ void StreamElementsBrowserWidgetManager::registerDefaultDocks()
     m_docks["se_activity_feed"] = activityFeed;
     obs_frontend_add_custom_qdock("se_activity_feed", static_cast<void*>(activityFeed));
 
-    // 2. Chat Dock
     auto *chatDock = new StreamElementsBrowserDock(
         "se_chat",
         tr("StreamElements Chat"),
@@ -34,7 +32,6 @@ void StreamElementsBrowserWidgetManager::registerDefaultDocks()
     m_docks["se_chat"] = chatDock;
     obs_frontend_add_custom_qdock("se_chat", static_cast<void*>(chatDock));
 
-    // 3. Media Request Dock
     auto *mediaDock = new StreamElementsBrowserDock(
         "se_media_request",
         tr("StreamElements Media Request"),

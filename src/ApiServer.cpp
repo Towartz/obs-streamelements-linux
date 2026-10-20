@@ -161,7 +161,6 @@ void StreamElementsApiServer::broadcastEvent(const QString &eventName, const QJs
 
 void StreamElementsApiServer::setupDefaultHandlers()
 {
-    // 1. getHostProperties
     registerHandler("getHostProperties", [](const QJsonObject &) -> QJsonObject {
         QJsonObject res;
         res["name"] = "obs-studio";
@@ -171,7 +170,6 @@ void StreamElementsApiServer::setupDefaultHandlers()
         return res;
     });
 
-    // 2. getAllScenes
     registerHandler("getAllScenes", [](const QJsonObject &) -> QJsonObject {
         QJsonObject res;
         QJsonArray scenesArray;
@@ -189,7 +187,6 @@ void StreamElementsApiServer::setupDefaultHandlers()
         return res;
     });
 
-    // 3. getCurrentScene
     registerHandler("getCurrentScene", [](const QJsonObject &) -> QJsonObject {
         QJsonObject res;
         obs_source_t *currentScene = obs_frontend_get_current_scene();
@@ -203,7 +200,6 @@ void StreamElementsApiServer::setupDefaultHandlers()
         return res;
     });
 
-    // 4. setCurrentSceneById
     registerHandler("setCurrentSceneById", [](const QJsonObject &params) -> QJsonObject {
         QString sceneName = params.value("sceneId").toString();
         if (sceneName.isEmpty()) {
@@ -219,7 +215,6 @@ void StreamElementsApiServer::setupDefaultHandlers()
         return res;
     });
 
-    // 5. getStreamingStatus
     registerHandler("getStreamingStatus", [](const QJsonObject &) -> QJsonObject {
         QJsonObject res;
         res["streaming"] = obs_frontend_streaming_active();
@@ -228,7 +223,6 @@ void StreamElementsApiServer::setupDefaultHandlers()
         return res;
     });
 
-    // 6. requestStreamingStart
     registerHandler("requestStreamingStart", [](const QJsonObject &) -> QJsonObject {
         obs_frontend_streaming_start();
         QJsonObject res;
@@ -236,7 +230,6 @@ void StreamElementsApiServer::setupDefaultHandlers()
         return res;
     });
 
-    // 7. requestStreamingStop
     registerHandler("requestStreamingStop", [](const QJsonObject &) -> QJsonObject {
         obs_frontend_streaming_stop();
         QJsonObject res;
@@ -244,7 +237,6 @@ void StreamElementsApiServer::setupDefaultHandlers()
         return res;
     });
 
-    // 8. getAllSceneCollections
     registerHandler("getAllSceneCollections", [](const QJsonObject &) -> QJsonObject {
         QJsonObject res;
         QJsonArray collsArray;
@@ -259,14 +251,12 @@ void StreamElementsApiServer::setupDefaultHandlers()
         return res;
     });
 
-    // 9. getUserInterfaceState
     registerHandler("getUserInterfaceState", [](const QJsonObject &) -> QJsonObject {
         QJsonObject res;
         res["studioMode"] = obs_frontend_preview_program_mode_active();
         return res;
     });
 
-    // 10. Backup & Restore
     registerHandler("createUserEnvironmentBackupPackage", StreamElementsBackupManager::handleCreateBackup);
     registerHandler("queryUserEnvironmentBackupPackageContents", StreamElementsBackupManager::handleQueryBackupContents);
     registerHandler("restoreUserEnvironmentBackupPackageContents", StreamElementsBackupManager::handleRestoreBackup);

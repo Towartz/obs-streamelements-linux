@@ -28,7 +28,6 @@ void StreamElementsBrowserDock::setupUi()
     layout->setContentsMargins(0, 0, 0, 0);
     layout->setSpacing(0);
 
-    // Ensure persistent storage directory exists for StreamElements web session cookies & storage
     QString storagePath = QStandardPaths::writableLocation(QStandardPaths::ConfigLocation) + "/obs-studio/plugins/obs-streamelements/storage";
     QDir().mkpath(storagePath);
 

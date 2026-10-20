@@ -107,7 +107,6 @@ bool StreamElementsAuthManager::validateAndApplyToken(const QString &token, QStr
         return false;
     }
 
-    // Call StreamElements API channels/me to validate token and fetch profile
     CURL *curl = curl_easy_init();
     if (!curl) {
         outError = "Failed to initialize HTTP client";

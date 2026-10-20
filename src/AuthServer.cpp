@@ -23,14 +23,14 @@ bool StreamElementsAuthServer::start(quint16 preferredPort)
 {
     stop();
 
-    // First attempt to bind to preferred port (4269 is standard for SE.Live)
+    // 4269 is the standard SE.Live loopback port
     if (m_tcpServer->listen(QHostAddress::LocalHost, preferredPort)) {
         m_port = m_tcpServer->serverPort();
         BLOG(LOG_INFO, "StreamElements OAuth loopback server listening on http://127.0.0.1:%d", m_port);
         return true;
     }
 
-    // If preferred port is busy, fallback to any available port
+    // Fall back to any available port
     if (m_tcpServer->listen(QHostAddress::LocalHost, 0)) {
         m_port = m_tcpServer->serverPort();
         BLOG(LOG_INFO, "StreamElements OAuth loopback server listening on fallback port http://127.0.0.1:%d", m_port);
@@ -122,7 +122,6 @@ void StreamElementsAuthServer::handleHttpRequest(QTcpSocket *socket, const QByte
 
     BLOG(LOG_INFO, "Loopback HTTP request: %s %s", method.toUtf8().constData(), rawPath.toUtf8().constData());
 
-    // 1. Handle CORS Preflight / Private Network Access
     if (method == "OPTIONS") {
         sendResponse(socket, 204, "No Content", "text/plain", "");
         return;
@@ -132,13 +131,11 @@ void StreamElementsAuthServer::handleHttpRequest(QTcpSocket *socket, const QByte
     QString path = url.path();
     QUrlQuery query(url);
 
-    // 2. Health check endpoint (checked by selive pre-auth)
     if (path == "/healthz") {
         sendResponse(socket, 200, "OK", "text/plain", "ok");
         return;
     }
 
-    // 3. Handle POST token or callback
     if (method == "POST") {
         int bodyStart = request.indexOf("\r\n\r\n");
         QByteArray body;
@@ -168,14 +165,12 @@ void StreamElementsAuthServer::handleHttpRequest(QTcpSocket *socket, const QByte
         return;
     }
 
-    // 4. Handle GET callback
     if (method == "GET") {
         QString token = query.queryItemValue("token");
         if (token.isEmpty()) {
             token = query.queryItemValue("creator");
         }
 
-        // Beautiful completion page
         QByteArray html = 
             "<!DOCTYPE html>"
             "<html><head><meta charset='utf-8'><title>StreamElements Authenticated</title>"

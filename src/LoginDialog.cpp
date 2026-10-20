@@ -46,7 +46,6 @@ void StreamElementsLoginDialog::setupUi()
     mainLayout->setContentsMargins(16, 16, 16, 16);
     mainLayout->setSpacing(12);
 
-    // Header Title
     QLabel *headerTitle = new QLabel(tr("StreamElements SE.Live"), this);
     headerTitle->setStyleSheet("font-size: 20px; font-weight: bold; color: #F53656;");
     
@@ -199,7 +198,6 @@ QWidget* StreamElementsLoginDialog::createEmbeddedWebTab()
     QVBoxLayout *layout = new QVBoxLayout(tab);
     layout->setContentsMargins(0, 0, 0, 0);
 
-    // Share persistent profile with all StreamElements docks
     QString storagePath = QStandardPaths::writableLocation(QStandardPaths::ConfigLocation) + "/obs-studio/plugins/obs-streamelements/storage";
     QDir().mkpath(storagePath);
 
@@ -236,16 +234,13 @@ void StreamElementsLoginDialog::onBrowserLoginClicked(const QString &provider)
 
     quint16 port = m_authServer->port();
 
-    // StreamElements Citadel / OAuth requires an authorized domain for the return parameter.
-    // selive.streamelements.com/auth/connect/<provider>/callback is the official return target,
-    // which then forwards the JWT token to our local loopback server on http://localhost:<port>/auth/connect/<provider>/token.
+    // SE.Live callback forwards the token to localhost
     QString seliveCallback = QString("https://selive.streamelements.com/auth/connect/%1/callback?port=%2")
                                  .arg(provider)
                                  .arg(port);
     QString encodedReturn = QString::fromUtf8(QUrl::toPercentEncoding(seliveCallback));
     QString authUrl = QString("https://id.streamelements.com/auth/%1?return=%2").arg(provider, encodedReturn);
 
-    // selive pre-auth flow: browser hits this, checks healthz on localhost:port, then redirects to authUrl
     QString preAuthUrl = QString("https://selive.streamelements.com/auth/%1/pre-auth?port=%2&authUrl=%3")
                              .arg(provider)
                              .arg(port)
@@ -317,7 +312,6 @@ void StreamElementsLoginDialog::onUrlChanged(const QUrl &url)
     QString urlStr = url.toString();
     BLOG(LOG_INFO, "In-app login navigation: %s", urlStr.toUtf8().constData());
 
-    // Once redirected to dashboard or themes, user is successfully authenticated!
     if (urlStr.contains("streamelements.com/dashboard") ||
         urlStr.contains("streamelements.com/activity-feed") ||
         urlStr.contains("streamelements.com/overlays")) {
